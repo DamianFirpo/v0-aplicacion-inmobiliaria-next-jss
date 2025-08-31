@@ -29,9 +29,9 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-base sm:text-lg">I</span>
+              <span className="text-primary-foreground font-bold text-xs sm:text-sm">MG</span>
             </div>
-            <span className="text-lg sm:text-xl font-bold text-foreground">InmoApp</span>
+            <span className="text-sm sm:text-lg font-bold text-foreground">Mariana Gomez Propiedades</span>
           </Link>
 
           {/* Desktop Navigation Menu */}

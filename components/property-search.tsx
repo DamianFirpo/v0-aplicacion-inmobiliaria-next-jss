@@ -15,6 +15,7 @@ export function PropertySearch() {
     location: filters.location,
     minPrice: filters.priceRange[0].toString(),
     maxPrice: filters.priceRange[1].toString(),
+    operationType: filters.operationType,
   })
 
   const handleFilterChange = (key: string, value: string) => {
@@ -29,6 +30,7 @@ export function PropertySearch() {
       propertyType: localFilters.propertyType,
       location: localFilters.location,
       priceRange: [minPrice, maxPrice],
+      operationType: localFilters.operationType,
     })
   }
 
@@ -38,18 +40,38 @@ export function PropertySearch() {
       location: "",
       minPrice: "",
       maxPrice: "",
+      operationType: "",
     }
     setLocalFilters(emptyFilters)
     setFilters({
       propertyType: "",
       location: "",
       priceRange: [0, 1000000],
+      operationType: "",
     })
   }
 
   return (
     <Card className="p-4 sm:p-6 mb-6 sm:mb-8 bg-card">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="space-y-2">
+          <Label htmlFor="operation-type" className="text-sm font-medium">
+            Operación
+          </Label>
+          <Select
+            value={localFilters.operationType}
+            onValueChange={(value) => handleFilterChange("operationType", value)}
+          >
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Venta o Alquiler" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="venta">Venta</SelectItem>
+              <SelectItem value="alquiler">Alquiler</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Tipo de Propiedad */}
         <div className="space-y-2">
           <Label htmlFor="property-type" className="text-sm font-medium">

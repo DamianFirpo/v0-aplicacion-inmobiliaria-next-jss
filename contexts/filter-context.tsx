@@ -13,12 +13,14 @@ interface Property {
   area: number
   type: string
   description: string
+  operationType: "venta" | "alquiler"
 }
 
 interface Filters {
   propertyType: string
   location: string
   priceRange: [number, number]
+  operationType: string
 }
 
 interface FilterContextType {
@@ -42,6 +44,7 @@ const sampleProperties: Property[] = [
     area: 65,
     type: "2 ambientes",
     description: "Moderno departamento con balcón y excelente ubicación",
+    operationType: "venta",
   },
   {
     id: 2,
@@ -54,11 +57,12 @@ const sampleProperties: Property[] = [
     area: 120,
     type: "3 ambientes",
     description: "Casa con patio y parrilla, ideal para familias",
+    operationType: "venta",
   },
   {
     id: 3,
     title: "Depto 1 ambiente en Recoleta",
-    price: 150000,
+    price: 85000,
     location: "Recoleta",
     image: "/elegant-studio-recoleta.png",
     bedrooms: 1,
@@ -66,6 +70,7 @@ const sampleProperties: Property[] = [
     area: 45,
     type: "1 ambiente",
     description: "Elegante monoambiente en zona premium",
+    operationType: "alquiler",
   },
   {
     id: 4,
@@ -78,11 +83,12 @@ const sampleProperties: Property[] = [
     area: 180,
     type: "4 ambientes",
     description: "Amplia casa familiar con jardín y garage",
+    operationType: "venta",
   },
   {
     id: 5,
     title: "Depto 3 ambientes en Bernal",
-    price: 200000,
+    price: 120000,
     location: "Bernal",
     image: "/apartment-view-bernal.png",
     bedrooms: 2,
@@ -90,6 +96,7 @@ const sampleProperties: Property[] = [
     area: 85,
     type: "3 ambientes",
     description: "Departamento con balcón y vista panorámica",
+    operationType: "alquiler",
   },
   {
     id: 6,
@@ -102,6 +109,7 @@ const sampleProperties: Property[] = [
     area: 75,
     type: "2 ambientes",
     description: "Loft de diseño industrial con techos altos",
+    operationType: "venta",
   },
 ]
 
@@ -110,14 +118,16 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     propertyType: "",
     location: "",
     priceRange: [0, 1000000],
+    operationType: "",
   })
 
   const filteredProperties = sampleProperties.filter((property) => {
     const matchesType = !filters.propertyType || property.type === filters.propertyType
     const matchesLocation = !filters.location || property.location === filters.location
     const matchesPrice = property.price >= filters.priceRange[0] && property.price <= filters.priceRange[1]
+    const matchesOperation = !filters.operationType || property.operationType === filters.operationType
 
-    return matchesType && matchesLocation && matchesPrice
+    return matchesType && matchesLocation && matchesPrice && matchesOperation
   })
 
   return (
