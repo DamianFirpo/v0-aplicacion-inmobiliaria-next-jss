@@ -3,24 +3,44 @@ import nodemailer from "nodemailer";
 
 export async function POST(request: Request) {
   try {
-    const {
-      name,
-      email,
-      phone,
-      message,
-      property,
-    } = await request.json();
+    const { name, email, phone, message, property } = await request.json();
 
-    // Log de entrada: qué datos trae el formulario
-    console.log(">>> Datos recibidos en /api/property-inquiry:", {
-      name,
-      email,
-      phone,
-      message,
-      property,
-    });
+    // Si existe RESEND_API_KEY, usar Resend en vez de SMTP
+    if (process.env.RESEND_API_KEY) {
+      const payload = {
+        from: process.env.SENDER_EMAIL!,
+        to: process.env.RECIPIENT_EMAIL!,
+        subject: `Consulta sobre: ${property?.title || ""}`,
+        reply_to: email,
+        text: [
+          `Nombre: ${name}`,
+          `Email: ${email}`,
+          `Teléfono: ${phone || "Sin proporcionar"}`,
+          "",
+          "Detalles de la propiedad:",
+          `• ID: ${property?.id ?? "N/A"}`,
+          `• Título: ${property?.title ?? ""}`,
+          `• Precio: ${property?.price ? "US$ " + property.price : ""}`,
+          `• Ubicación: ${property?.location ?? ""}`,
+          "",
+          "Mensaje del interesado:",
+          message,
+        ].join("\n"),
+      };
 
-    // Configuración de nodemailer
+      await fetch("https://api.resend.com/v1/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      return NextResponse.json({ success: true });
+    }
+
+    // Caso contrario: SMTP (opción antigua)
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || "smtp-mail.outlook.com",
       port: Number(process.env.SMTP_PORT) || 587,
@@ -31,14 +51,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // Verifica conexión SMTP antes de enviar
-    await transporter.verify();
-    console.log(">>> Conexión SMTP verificada con:", process.env.SMTP_USER);
-
-    // Construye y envía el correo
-    const info = await transporter.sendMail({
-      from: `"Consulta Inmobiliaria" <${process.env.SMTP_USER}>`, // remitente real
-      replyTo: email, // si respondes, le llega al cliente
+    await transporter.sendMail({
+      from: `"Consulta Inmobiliaria" <${process.env.SMTP_USER}>`,
+      replyTo: email,
       to: process.env.RECIPIENT_EMAIL || "dfirpo@msn.com",
       subject: `Consulta sobre la propiedad: ${property?.title || ""}`,
       text: [
@@ -56,9 +71,6 @@ export async function POST(request: Request) {
         message,
       ].join("\n"),
     });
-
-    // Log del resultado del envío
-    console.log(">>> Correo enviado. Respuesta SMTP:", info);
 
     return NextResponse.json({ success: true });
   } catch (error) {
