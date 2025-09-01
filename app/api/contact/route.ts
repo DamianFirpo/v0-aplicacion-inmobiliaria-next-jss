@@ -5,7 +5,6 @@ export async function POST(request: Request) {
   try {
     const { name, email, phone, subject, message } = await request.json();
 
-    // Configura tu servidor SMTP. Cambia los valores por los tuyos en Vercel
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || "smtp-mail.outlook.com",
       port: Number(process.env.SMTP_PORT) || 587,
@@ -16,9 +15,11 @@ export async function POST(request: Request) {
       },
     });
 
-    // Envía el correo
     await transporter.sendMail({
-      from: `${name} <${email}>`,
+      // remitente real = la cuenta que autentica en SMTP
+      from: `${name} <${process.env.SMTP_USER}>`,
+      // al contestar, responderás al cliente
+      replyTo: email,
       to: process.env.RECIPIENT_EMAIL || "dfirpo@msn.com",
       subject: subject ? `Consulta: ${subject}` : "Consulta inmobiliaria",
       text: [
