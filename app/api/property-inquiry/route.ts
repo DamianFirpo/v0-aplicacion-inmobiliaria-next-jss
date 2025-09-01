@@ -11,6 +11,15 @@ export async function POST(request: Request) {
       property,
     } = await request.json();
 
+    // Log de entrada: qué datos trae el formulario
+    console.log(">>> Datos recibidos en /api/property-inquiry:", {
+      name,
+      email,
+      phone,
+      message,
+      property,
+    });
+
     // Configuración de nodemailer
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || "smtp-mail.outlook.com",
@@ -22,10 +31,14 @@ export async function POST(request: Request) {
       },
     });
 
+    // Verifica conexión SMTP antes de enviar
+    await transporter.verify();
+    console.log(">>> Conexión SMTP verificada con:", process.env.SMTP_USER);
+
     // Construye y envía el correo
-    await transporter.sendMail({
-      from: `${name} <${process.env.SMTP_USER}>`,
-      replyTo: email, // para que al responder, le respondas al cliente
+    const info = await transporter.sendMail({
+      from: `"Consulta Inmobiliaria" <${process.env.SMTP_USER}>`, // remitente real
+      replyTo: email, // si respondes, le llega al cliente
       to: process.env.RECIPIENT_EMAIL || "dfirpo@msn.com",
       subject: `Consulta sobre la propiedad: ${property?.title || ""}`,
       text: [
@@ -44,9 +57,12 @@ export async function POST(request: Request) {
       ].join("\n"),
     });
 
+    // Log del resultado del envío
+    console.log(">>> Correo enviado. Respuesta SMTP:", info);
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error al enviar consulta:", error);
+    console.error("❌ Error al enviar consulta:", error);
     return NextResponse.json(
       { error: "Error al enviar la consulta" },
       { status: 500 },
